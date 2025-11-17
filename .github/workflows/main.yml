@@ -6,7 +6,7 @@ on:
       - master
 
 permissions:
-  id-token: write     # Required for OIDC authentication
+  id-token: write # Required for OIDC authentication
   contents: read
 
 jobs:
@@ -21,8 +21,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
-          cache: 'yarn'                     # Enable Yarn caching
-          cache-dependency-path: '**/yarn.lock'
+          cache: "yarn" # Enable Yarn caching
+          cache-dependency-path: "**/yarn.lock"
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -33,7 +33,7 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ARN_ROLE }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-north-1
 
       - name: Deploy to S3
