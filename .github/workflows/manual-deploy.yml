@@ -1,0 +1,62 @@
+name: Manual Deploy to S3
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch name to deploy (example: feature/login-ui)"
+        required: true
+        type: string
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the branch selected by user
+      - name: Checkout selected branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      # 2. Setup Node.js + Yarn caching
+      - name: Setup Node.js (22.12.0) with Yarn cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: "yarn"
+          cache-dependency-path: "**/yarn.lock"
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # 4. Build the React app
+      - name: Build React app
+        run: yarn build
+
+      # 5. Configure AWS OIDC role (same as auto deploy)
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-north-1
+
+      # 6. Deploy to S3 (same bucket)
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./dist s3://mm-demo-app --delete
+
+      # 7. Log summary for traceability
+      - name: Log deployment summary
+        run: |
+          echo "----------------------------------------"
+          echo "Manual Deployment Completed"
+          echo "Deployed Branch : ${{ github.event.inputs.branch }}"
+          echo "S3 Bucket       : mm-demo-app"
+          echo "Environment     : Manual / On-Demand"
+          echo "----------------------------------------"
