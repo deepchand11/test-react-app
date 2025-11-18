@@ -71,6 +71,12 @@
   color: white;
 }
 
+.select-drop-item.highlighted {
+  background-color: #e8e8ff;
+  border-left: 3px solid #646cff;
+  padding-left: 12px;
+}
+
 .select-drop-item.disabled {
   color: #999;
   cursor: not-allowed;
